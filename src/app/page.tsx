@@ -21,7 +21,6 @@ export default function Home() {
   const forceStopRef = useRef(false)
   const listeningRef = useRef(isListening)
   const streamingRef = useRef(isStreaming)
-  const lastResultIndexRef = useRef(0) // ✅ prevent duplication
 
   useEffect(() => {
     listeningRef.current = isListening
@@ -41,19 +40,13 @@ export default function Home() {
       recognition.onresult = (event: SpeechRecognitionEvent) => {
         let interim = ''
         let final = ''
-
-        // ✅ Only process new results
-        for (let i = lastResultIndexRef.current; i < event.results.length; ++i) {
-          const result = event.results[i]
-          if (result.isFinal) {
-            final += result[0].transcript + ' '
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            final += event.results[i][0].transcript + ' '
           } else {
-            interim += result[0].transcript + ' '
+            interim += event.results[i][0].transcript + ' '
           }
         }
-
-        lastResultIndexRef.current = event.results.length
-
         setLiveTranscript(interim.trim())
         setFinalTranscript(prev => (final ? prev + final : prev))
       }
@@ -95,7 +88,6 @@ export default function Home() {
   const startListening = () => {
     if (recognitionRef.current && !isStreaming) {
       resetAll()
-      lastResultIndexRef.current = 0 // ✅ reset tracking
       forceStopRef.current = false
       recognitionRef.current.start()
       setIsListening(true)
@@ -168,7 +160,6 @@ export default function Home() {
   }
 
   const resetAll = () => {
-    lastResultIndexRef.current = 0 // ✅ also reset here
     setAnswerText('')
     setCodeText('')
     setFinalTranscript('')
