@@ -3,6 +3,12 @@
 import React, { useEffect, useRef, useState } from 'react'
 import './page.css'
 
+// ✅ Fix: define missing type for TS
+type SpeechRecognitionEvent = Event & {
+  readonly resultIndex: number
+  readonly results: SpeechRecognitionResultList
+}
+
 export default function Home() {
   const [isListening, setIsListening] = useState(false)
   const [isStreaming, setIsStreaming] = useState(false)
